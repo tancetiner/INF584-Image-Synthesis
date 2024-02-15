@@ -257,19 +257,19 @@ void initScene()
 
 	// Directional light
 	auto lightPtr = std::make_shared<DirectionalLightSource>();
-	lightPtr->direction = glm::vec3(2.0, 0.0, 3.0 * meshScale);
+	lightPtr->direction = glm::vec3(2.0, 0.0, 2.0 * meshScale);
 	lightPtr->color = glm::vec3(1.0, 0.0, 0.0);
-	lightPtr->intensity = 1.0;
+	lightPtr->intensity = 0.6;
 	scenePtr->add(lightPtr);
 
 	// Point light
 	auto pointLightPtr = std::make_shared<PointLightSource>();
-	pointLightPtr->position = glm::vec3(0.0, 0.0, 3.0 * meshScale);
-	pointLightPtr->color = glm::vec3(1.0, 1.0, 1.0);
+	pointLightPtr->position = glm::vec3(-2.0, 0.0, 1.0 * meshScale);
+	pointLightPtr->color = glm::vec3(0.0, 1.0, 1.0);
 	pointLightPtr->intensity = 1.0;
-	pointLightPtr->constantAttenuation = 0.0;
-	pointLightPtr->linearAttenuation = 0.0;
-	pointLightPtr->quadraticAttenuation = 0.0;
+	pointLightPtr->constantAttenuation = 0.8;
+	pointLightPtr->linearAttenuation = 0.6;
+	pointLightPtr->quadraticAttenuation = 0.4;
 	scenePtr->add(pointLightPtr);
 
 	// Camera

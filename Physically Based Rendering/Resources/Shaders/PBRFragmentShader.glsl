@@ -27,6 +27,7 @@ struct Material {
 
 #define MAX_LIGHTS 1
 uniform DirectionalLightSource[MAX_LIGHTS] directionalLights;
+uniform PointLightSource[MAX_LIGHTS] pointLights;
 uniform Material material;
 
 void main () {
@@ -34,20 +35,49 @@ void main () {
 	vec3 fragNormal = normalize(fNormal);
 	vec3 fragPosition = normalize(fPosition);
 	vec3 viewDir = normalize(-fragPosition);
-	vec3 lightDirection = normalize(directionalLights[0].direction);
-	vec3 lightColor = directionalLights[0].color * directionalLights[0].intensity;
 
-	// Diffuse
-	float diff = max(dot(fragNormal, lightDirection), 0.0);
-	vec3 diffuse = diff * lightColor;	
+	vec3 finalColor = vec3(0.0);
+	for (int i=0 ; i < MAX_LIGHTS ; i++) {
+		vec3 lightDirection = normalize(directionalLights[i].direction);
+		vec3 lightColor = directionalLights[i].color * directionalLights[i].intensity;
 
-	// Specular
-	vec3 halfDir = normalize(viewDir + lightDirection);
-	float shininess = 128.0;
-	float spec = pow(max(dot(fragNormal, halfDir), 0.0), shininess);
-	vec3 specular = lightColor * spec;	
+		// Diffuse
+		float diff = max(dot(fragNormal, lightDirection), 0.0);
+		vec3 diffuse = diff * lightColor;	
+
+		// Specular
+		vec3 halfDir = normalize(viewDir + lightDirection);
+		float shininess = 128.0;
+		float spec = pow(max(dot(fragNormal, halfDir), 0.0), shininess);
+		vec3 specular = lightColor * spec;	
+
+		// Set the color response
+		finalColor += (diffuse + specular) * albedo;
+	}
+
+	// Point light
+	for (int i=0 ; i < MAX_LIGHTS ; i++) {
+		vec3 lightDirection = normalize(pointLights[i].position - fragPosition);
+		vec3 lightColor = pointLights[i].color * pointLights[i].intensity;
+
+		// Diffuse
+		float diff = max(dot(fragNormal, lightDirection), 0.0);
+		vec3 diffuse = diff * lightColor;	
+
+		// Specular
+		vec3 halfDir = normalize(viewDir + lightDirection);
+		float shininess = 128.0;
+		float spec = pow(max(dot(fragNormal, halfDir), 0.0), shininess);
+		vec3 specular = lightColor * spec;	
+
+		// Attenuation
+		float distance = length(pointLights[i].position - fragPosition);
+		float attenuation = 1.0 / (pointLights[i].constantAttenuation + pointLights[i].linearAttenuation * distance + pointLights[i].quadraticAttenuation * distance * distance);
+
+		// Set the color response
+		finalColor += (diffuse + specular) * albedo * attenuation;
+	}
 
 	// Set the color response
-	vec3 finalColor = (diffuse + specular) * albedo;
 	colorResponse = vec4 (finalColor, 1.0);
 }

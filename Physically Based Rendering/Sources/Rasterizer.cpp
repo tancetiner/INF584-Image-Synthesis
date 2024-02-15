@@ -120,6 +120,17 @@ void Rasterizer::render(std::shared_ptr<Scene> scenePtr)
 			m_pbrShaderProgramPtr->set(lightStr + "color", scenePtr->lights()[j]->color);
 			m_pbrShaderProgramPtr->set(lightStr + "intensity", scenePtr->lights()[j]->intensity);
 		}
+		numOfLights = scenePtr->pointLights().size();
+		for (size_t j = 0; j < numOfLights; j++)
+		{
+			std::string lightStr = "pointLights[" + std::to_string(j) + "].";
+			m_pbrShaderProgramPtr->set(lightStr + "position", scenePtr->pointLights()[j]->position);
+			m_pbrShaderProgramPtr->set(lightStr + "color", scenePtr->pointLights()[j]->color);
+			m_pbrShaderProgramPtr->set(lightStr + "intensity", scenePtr->pointLights()[j]->intensity);
+			m_pbrShaderProgramPtr->set(lightStr + "constantAttenuation", scenePtr->pointLights()[j]->constantAttenuation);
+			m_pbrShaderProgramPtr->set(lightStr + "linearAttenuation", scenePtr->pointLights()[j]->linearAttenuation);
+			m_pbrShaderProgramPtr->set(lightStr + "quadraticAttenuation", scenePtr->pointLights()[j]->quadraticAttenuation);
+		}
 		draw(i, scenePtr->mesh(i)->triangleIndices().size());
 	}
 	m_pbrShaderProgramPtr->stop();
