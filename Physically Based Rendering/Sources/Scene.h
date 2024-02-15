@@ -14,36 +14,64 @@
 
 #include "Camera.h"
 #include "Mesh.h"
-class Scene {
+
+struct DirectionalLightSource
+{
+    glm::vec3 direction;
+    glm::vec3 color;
+    float intensity;
+};
+
+struct PointLightSource : public Transform
+{
+    glm::vec3 position;
+    glm::vec3 color;
+    float intensity;
+    float constantAttenuation;
+    float linearAttenuation;
+    float quadraticAttenuation;
+};
+
+class Scene
+{
 public:
-	inline Scene () : m_backgroundColor (0.f, 0.f ,0.f) {}
-	virtual ~Scene() {}
+    inline Scene() : m_backgroundColor(0.f, 0.f, 0.f) {}
+    virtual ~Scene() {}
 
-	inline const glm::vec3 & backgroundColor () const { return m_backgroundColor; }
+    inline const glm::vec3 &backgroundColor() const { return m_backgroundColor; }
 
-	inline void setBackgroundColor (const glm::vec3 & color) { m_backgroundColor = color; }
- 
-	inline void set (std::shared_ptr<Camera> camera) { m_camera = camera; }
+    inline void setBackgroundColor(const glm::vec3 &color) { m_backgroundColor = color; }
 
-	inline const std::shared_ptr<Camera> camera() const { return m_camera; }
+    inline void set(std::shared_ptr<Camera> camera) { m_camera = camera; }
 
-	inline std::shared_ptr<Camera> camera() { return m_camera; }
+    inline const std::shared_ptr<Camera> camera() const { return m_camera; }
 
-	inline void add (std::shared_ptr<Mesh> mesh) { m_meshes.push_back (mesh); }
+    inline std::shared_ptr<Camera> camera() { return m_camera; }
 
-	inline size_t numOfMeshes () const { return m_meshes.size (); }
+    inline void add(std::shared_ptr<Mesh> mesh) { m_meshes.push_back(mesh); }
 
-	inline const std::shared_ptr<Mesh> mesh (size_t index) const { return m_meshes[index]; }
+    inline size_t numOfMeshes() const { return m_meshes.size(); }
 
-	inline std::shared_ptr<Mesh> mesh (size_t index) { return m_meshes[index]; }
+    inline const std::shared_ptr<Mesh> mesh(size_t index) const { return m_meshes[index]; }
 
-	inline void clear () {
-		m_camera.reset ();
-		m_meshes.clear ();
-	}
+    inline std::shared_ptr<Mesh> mesh(size_t index) { return m_meshes[index]; }
+
+    inline void add(std::shared_ptr<DirectionalLightSource> light) { m_directionalLightSources.push_back(light); }
+    inline const std::vector<std::shared_ptr<DirectionalLightSource>> &lights() const { return m_directionalLightSources; }
+
+    inline void add(std::shared_ptr<PointLightSource> light) { m_pointLightSources.push_back(light); }
+    inline const std::vector<std::shared_ptr<PointLightSource>> &pointLights() const { return m_pointLightSources; }
+
+    inline void clear()
+    {
+        m_camera.reset();
+        m_meshes.clear();
+    }
 
 private:
-	glm::vec3 m_backgroundColor;
-	std::shared_ptr<Camera> m_camera;
-	std::vector<std::shared_ptr<Mesh> > m_meshes;
+    glm::vec3 m_backgroundColor;
+    std::shared_ptr<Camera> m_camera;
+    std::vector<std::shared_ptr<Mesh>> m_meshes;
+    std::vector<std::shared_ptr<DirectionalLightSource>> m_directionalLightSources;
+    std::vector<std::shared_ptr<PointLightSource>> m_pointLightSources;
 };

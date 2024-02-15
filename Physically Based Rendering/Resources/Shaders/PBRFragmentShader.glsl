@@ -4,32 +4,50 @@ in vec3 fNormal; // Shader input, linearly interpolated by default from the prev
 in vec3 fPosition; // Shader input, linearly interpolated by default from the previous stage (here the vertex shader)
 out vec4 colorResponse; // Shader output: the color response attached to this fragment
 
-struct LightSource {
+struct DirectionalLightSource {
 	vec3 direction;
 	vec3 color;
 	float intensity;
 }; 
+
+struct PointLightSource {
+	vec3 position;
+	vec3 color;
+	float intensity;
+    float constantAttenuation;
+    float linearAttenuation;
+    float quadraticAttenuation;
+};
 
 struct Material {
 	vec3 albedo;
 	float roughness;
 };
 
-uniform LightSource light;
+
+#define MAX_LIGHTS 1
+uniform DirectionalLightSource[MAX_LIGHTS] directionalLights;
 uniform Material material;
 
 void main () {
-	// vec3 N = normalize(fNormal);
-	// vec3 L = normalize(-light.direction);
-	// vec3 H = normalize(L + vec3(0, 0, 1));
-	// float NdotL = max(dot(N, L), 0.0);
-	// float NdotH = max(dot(N, H), 0.0);
-	// float VdotH = max(dot(normalize(-gl_FragCoord.xyz), H), 0.0);
-	// float NdotV = max(dot(N, normalize(-gl_FragCoord.xyz)), 0.0);
-	// float G = min(1.0, min(2.0 * NdotH * NdotV / VdotH, 2.0 * NdotH * NdotL / VdotH));
-	// float D = 1.0 / (material.roughness * material.roughness * pow(NdotH, 4.0));
-	// float F = 0.5 + 0.5 * pow(1.0 - VdotH, 5.0);
-	// vec3 specular = (D * F * G) / (4.0 * NdotL * NdotV);
-	// colorResponse = vec4 (material.albedo * NdotL + specular, 1.0);
-	colorResponse = vec4 (fNormal, 1.0);
+	vec3 albedo = material.albedo;
+	vec3 fragNormal = normalize(fNormal);
+	vec3 fragPosition = normalize(fPosition);
+	vec3 viewDir = normalize(-fragPosition);
+	vec3 lightDirection = normalize(directionalLights[0].direction);
+	vec3 lightColor = directionalLights[0].color * directionalLights[0].intensity;
+
+	// Diffuse
+	float diff = max(dot(fragNormal, lightDirection), 0.0);
+	vec3 diffuse = diff * lightColor;	
+
+	// Specular
+	vec3 halfDir = normalize(viewDir + lightDirection);
+	float shininess = 128.0;
+	float spec = pow(max(dot(fragNormal, halfDir), 0.0), shininess);
+	vec3 specular = lightColor * spec;	
+
+	// Set the color response
+	vec3 finalColor = (diffuse + specular) * albedo;
+	colorResponse = vec4 (finalColor, 1.0);
 }
