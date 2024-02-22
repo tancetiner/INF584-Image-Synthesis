@@ -112,6 +112,54 @@ void keyCallback(GLFWwindow *windowPtr, int key, int scancode, int action, int m
 		{
 			raytrace();
 		}
+
+		// camera translation with W A S D
+		else if (action == GLFW_PRESS && key == GLFW_KEY_W)
+		{
+			scenePtr->camera()->setTranslation(scenePtr->camera()->getTranslation() + glm::vec3(0.0, 0.0, -0.1 * meshScale));
+		}
+		else if (action == GLFW_PRESS && key == GLFW_KEY_S)
+		{
+			scenePtr->camera()->setTranslation(scenePtr->camera()->getTranslation() + glm::vec3(0.0, 0.0, 0.1 * meshScale));
+		}
+		else if (action == GLFW_PRESS && key == GLFW_KEY_A)
+		{
+			scenePtr->camera()->setTranslation(scenePtr->camera()->getTranslation() + glm::vec3(-0.1 * meshScale, 0.0, 0.0));
+		}
+		else if (action == GLFW_PRESS && key == GLFW_KEY_D)
+		{
+			scenePtr->camera()->setTranslation(scenePtr->camera()->getTranslation() + glm::vec3(0.1 * meshScale, 0.0, 0.0));
+		}
+
+		// continue to move the camera as long as the key is pressed
+		else if (action == GLFW_REPEAT && key == GLFW_KEY_W)
+		{
+			scenePtr->camera()->setTranslation(scenePtr->camera()->getTranslation() + glm::vec3(0.0, 0.0, -0.1 * meshScale));
+		}
+		else if (action == GLFW_REPEAT && key == GLFW_KEY_S)
+		{
+			scenePtr->camera()->setTranslation(scenePtr->camera()->getTranslation() + glm::vec3(0.0, 0.0, 0.1 * meshScale));
+		}
+		else if (action == GLFW_REPEAT && key == GLFW_KEY_A)
+		{
+			scenePtr->camera()->setTranslation(scenePtr->camera()->getTranslation() + glm::vec3(-0.1 * meshScale, 0.0, 0.0));
+		}
+		else if (action == GLFW_REPEAT && key == GLFW_KEY_D)
+		{
+			scenePtr->camera()->setTranslation(scenePtr->camera()->getTranslation() + glm::vec3(0.1 * meshScale, 0.0, 0.0));
+		}
+
+		else if (action == GLFW_PRESS && key == GLFW_KEY_J)
+		{
+			std::cout << scenePtr->pointLights()[0]->getTranslation().x << " " << scenePtr->pointLights()[0]->getTranslation().y << " " << scenePtr->pointLights()[0]->getTranslation().z << std::endl;
+			scenePtr->pointLights()[0]->setTranslation(scenePtr->pointLights()[0]->getTranslation() + glm::vec3(0.1 * meshScale, 0.0, 0.0));
+		}
+		else if (action == GLFW_REPEAT && key == GLFW_KEY_J)
+		{
+			std::cout << scenePtr->pointLights()[0]->getTranslation().x << " " << scenePtr->pointLights()[0]->getTranslation().y << " " << scenePtr->pointLights()[0]->getTranslation().z << std::endl;
+			scenePtr->pointLights()[0]->setTranslation(scenePtr->pointLights()[0]->getTranslation() + glm::vec3(0.1 * meshScale, 0.0, 0.0));
+		}
+
 		else
 		{
 			printHelp();
@@ -248,8 +296,9 @@ void initScene()
 
 	// Create a material and assign it to the mesh
 	auto materialPtr = std::make_shared<Material>();
-	materialPtr->albedo = glm::vec3(0.8f, 0.8f, 0.8f);
-	materialPtr->roughness = 0.1f;
+	materialPtr->albedo = glm::vec3(1.0f, 1.0f, 1.0f);
+	materialPtr->roughness = 0.05f;
+	materialPtr->metallicness = 0.4f;
 	meshPtr->material() = materialPtr;
 
 	// Add the mesh to the scene
@@ -257,19 +306,40 @@ void initScene()
 
 	// Directional light
 	auto lightPtr = std::make_shared<DirectionalLightSource>();
-	lightPtr->direction = glm::vec3(2.0, 0.0, 2.0 * meshScale);
-	lightPtr->color = glm::vec3(1.0, 0.0, 0.0);
-	lightPtr->intensity = 0.6;
+	lightPtr->direction = glm::vec3(0.0, 0.0, 20.0 * meshScale);
+	lightPtr->color = glm::vec3(1.0, 1.0, 1.0);
+	lightPtr->intensity = 0.5;
 	scenePtr->add(lightPtr);
 
-	// Point light
+	// Point lights
 	auto pointLightPtr = std::make_shared<PointLightSource>();
 	pointLightPtr->position = glm::vec3(-2.0, 0.0, 1.0 * meshScale);
 	pointLightPtr->color = glm::vec3(0.0, 1.0, 1.0);
 	pointLightPtr->intensity = 1.0;
-	pointLightPtr->constantAttenuation = 0.8;
-	pointLightPtr->linearAttenuation = 0.6;
-	pointLightPtr->quadraticAttenuation = 0.4;
+	// got the constants from LearnOpenGL
+	pointLightPtr->constantAttenuation = 1.0;
+	pointLightPtr->linearAttenuation = 0.7;
+	pointLightPtr->quadraticAttenuation = 1.8;
+	scenePtr->add(pointLightPtr);
+
+	pointLightPtr = std::make_shared<PointLightSource>();
+	pointLightPtr->position = glm::vec3(2.0, 0.0, 2.0 * meshScale);
+	pointLightPtr->color = glm::vec3(1.0, 0.0, 0.0);
+	pointLightPtr->intensity = 1.0;
+	// got the constants from LearnOpenGL
+	pointLightPtr->constantAttenuation = 1.0;
+	pointLightPtr->linearAttenuation = 0.7;
+	pointLightPtr->quadraticAttenuation = 1.8;
+	scenePtr->add(pointLightPtr);
+
+	pointLightPtr = std::make_shared<PointLightSource>();
+	pointLightPtr->position = glm::vec3(0.0, 2.0, 0.0 * meshScale);
+	pointLightPtr->color = glm::vec3(1.0, 1.0, 1.0);
+	pointLightPtr->intensity = 1.0;
+	// got the constants from LearnOpenGL
+	pointLightPtr->constantAttenuation = 1.0;
+	pointLightPtr->linearAttenuation = 0.7;
+	pointLightPtr->quadraticAttenuation = 1.8;
 	scenePtr->add(pointLightPtr);
 
 	// Camera

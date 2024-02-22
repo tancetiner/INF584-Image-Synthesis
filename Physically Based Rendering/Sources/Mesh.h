@@ -20,6 +20,7 @@ struct Material
 {
 	glm::vec3 albedo;
 	float roughness;
+	float metallicness;
 };
 
 class Mesh : public Transform

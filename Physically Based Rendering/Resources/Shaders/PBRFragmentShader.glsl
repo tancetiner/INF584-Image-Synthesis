@@ -22,62 +22,110 @@ struct PointLightSource {
 struct Material {
 	vec3 albedo;
 	float roughness;
+	float metallicness;
 };
 
 
-#define MAX_LIGHTS 1
-uniform DirectionalLightSource[MAX_LIGHTS] directionalLights;
+#define MAX_LIGHTS 3
+#define M_PI 3.14159
+uniform DirectionalLightSource[1] directionalLights;
 uniform PointLightSource[MAX_LIGHTS] pointLights;
 uniform Material material;
+uniform mat4 modelViewMat;
+
+float GGX_Distribution(vec3 N, vec3 H, float roughness) {
+	float a = roughness * roughness;
+	float NdotH = max(dot(N, H), 0.0);
+
+	float denom = 1.0 + NdotH * NdotH * (a - 1.0);
+	return a / (M_PI * denom * denom);
+}
+
+float GGX_Geometry(vec3 N, vec3 V, vec3 L, float roughness) {
+	float k = roughness * roughness / 2.0;
+
+	float NdotV = max(dot(N, V), 0.0);
+	float NdotL = max(dot(N, L), 0.0);
+
+	float G1 = 2.0 * NdotV / (NdotV + sqrt(roughness * roughness + (1.0 - roughness * roughness) * NdotV * NdotV));
+	float G2 = 2.0 * NdotL / (NdotL + sqrt(roughness * roughness + (1.0 - roughness * roughness) * NdotL * NdotL));
+
+	return G1 * G2;
+}
+
+vec3 PBRMicrofacetBRDF(vec3 N, vec3 V, vec3 L, vec3 albedo, float roughness, float metallicness) {
+	vec3 H = normalize(V + L);
+	float D = GGX_Distribution(N, H, roughness);
+	float G = GGX_Geometry(N, V, L, roughness);
+
+	// Fresnel equation with Schlick's approximation
+	vec3 F0 = mix(vec3(0.04), albedo, metallicness);
+	vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(L, H), 5.0);
+
+	vec3 numerator = D * G * F;
+	float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001;
+
+	return numerator / denominator;
+}
 
 void main () {
-	vec3 albedo = material.albedo;
+	vec3 albedo = material.albedo / M_PI;
 	vec3 fragNormal = normalize(fNormal);
 	vec3 fragPosition = normalize(fPosition);
 	vec3 viewDir = normalize(-fragPosition);
-
+	
+	vec3 Lo = vec3(0.0);
 	vec3 finalColor = vec3(0.0);
-	for (int i=0 ; i < MAX_LIGHTS ; i++) {
-		vec3 lightDirection = normalize(directionalLights[i].direction);
+
+	// Directional lights
+	for (int i=0 ; i < 1 ; i++) {
+		vec3 lightDirection = normalize(vec3(modelViewMat * vec4(directionalLights[i].direction, 1.0)));
 		vec3 lightColor = directionalLights[i].color * directionalLights[i].intensity;
 
-		// Diffuse
-		float diff = max(dot(fragNormal, lightDirection), 0.0);
-		vec3 diffuse = diff * lightColor;	
+		// PBR Microfacet BRDF
+		vec3 specular = PBRMicrofacetBRDF(fragNormal, viewDir, lightDirection, material.albedo, material.roughness, material.metallicness);
 
-		// Specular
-		vec3 halfDir = normalize(viewDir + lightDirection);
-		float shininess = 128.0;
-		float spec = pow(max(dot(fragNormal, halfDir), 0.0), shininess);
-		vec3 specular = lightColor * spec;	
+		vec3 F0 = mix(vec3(0.04), material.albedo, material.metallicness);
+		vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(lightDirection, normalize(viewDir + lightDirection)), 5.0);
 
-		// Set the color response
-		finalColor += (diffuse + specular) * albedo;
+		vec3 kS = F;
+		vec3 kD = vec3(1.0) - kS;
+		kD *= 1.0 - material.metallicness;
+
+		const float PI = 3.14159265359;
+  
+		float NdotL = max(dot(fragNormal, lightDirection), 0.0);        
+		Lo += (kD * material.albedo / PI + specular) * directionalLights[i].color * NdotL;
 	}
 
-	// Point light
+	// Point lights
 	for (int i=0 ; i < MAX_LIGHTS ; i++) {
-		vec3 lightDirection = normalize(pointLights[i].position - fragPosition);
+		vec3 pointLightPosition = vec3(modelViewMat * vec4(pointLights[i].position, 1.0));
+		vec3 lightDirection = normalize(pointLightPosition - fragPosition);
 		vec3 lightColor = pointLights[i].color * pointLights[i].intensity;
 
-		// Diffuse
-		float diff = max(dot(fragNormal, lightDirection), 0.0);
-		vec3 diffuse = diff * lightColor;	
-
-		// Specular
-		vec3 halfDir = normalize(viewDir + lightDirection);
-		float shininess = 128.0;
-		float spec = pow(max(dot(fragNormal, halfDir), 0.0), shininess);
-		vec3 specular = lightColor * spec;	
+		// PBR Microfacet BRDF
+		vec3 specular = PBRMicrofacetBRDF(fragNormal, viewDir, lightDirection, material.albedo, material.roughness, material.metallicness);
 
 		// Attenuation
-		float distance = length(pointLights[i].position - fragPosition);
+		float distance = length(pointLightPosition - fragPosition);
 		float attenuation = 1.0 / (pointLights[i].constantAttenuation + pointLights[i].linearAttenuation * distance + pointLights[i].quadraticAttenuation * distance * distance);
+		vec3 radiance     = pointLights[i].color * attenuation; 
 
-		// Set the color response
-		finalColor += (diffuse + specular) * albedo * attenuation;
+		vec3 F0 = mix(vec3(0.04), material.albedo, material.metallicness);
+		vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(lightDirection, normalize(viewDir + lightDirection)), 5.0);
+
+		vec3 kS = F;
+		vec3 kD = vec3(1.0) - kS;
+		kD *= 1.0 - material.metallicness;
+
+		const float PI = 3.14159265359;
+  
+		float NdotL = max(dot(fragNormal, lightDirection), 0.0);        
+		Lo += (kD * material.albedo / PI + specular) * radiance * NdotL;
 	}
 
 	// Set the color response
-	colorResponse = vec4 (finalColor, 1.0);
+	finalColor = vec3(0.03) * material.albedo + Lo;
+	colorResponse = vec4(finalColor, 1.0);
 }

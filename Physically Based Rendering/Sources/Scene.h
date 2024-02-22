@@ -25,6 +25,7 @@ struct DirectionalLightSource
 struct PointLightSource : public Transform
 {
     glm::vec3 position;
+    glm::mat4 transformationMatrix;
     glm::vec3 color;
     float intensity;
     float constantAttenuation;

@@ -111,6 +111,7 @@ void Rasterizer::render(std::shared_ptr<Scene> scenePtr)
 		m_pbrShaderProgramPtr->set("normalMat", normalMatrix);
 		m_pbrShaderProgramPtr->set("material.albedo", scenePtr->mesh(i)->material()->albedo);
 		m_pbrShaderProgramPtr->set("material.roughness", scenePtr->mesh(i)->material()->roughness);
+		m_pbrShaderProgramPtr->set("material.metallicness", scenePtr->mesh(i)->material()->metallicness);
 		// assign light sources
 		size_t numOfLights = scenePtr->lights().size();
 		for (size_t j = 0; j < numOfLights; j++)
@@ -124,7 +125,8 @@ void Rasterizer::render(std::shared_ptr<Scene> scenePtr)
 		for (size_t j = 0; j < numOfLights; j++)
 		{
 			std::string lightStr = "pointLights[" + std::to_string(j) + "].";
-			m_pbrShaderProgramPtr->set(lightStr + "position", scenePtr->pointLights()[j]->position);
+			
+			m_pbrShaderProgramPtr->set(lightStr + "position", glm::vec3(scenePtr->pointLights()[j]->computeTransformMatrix() * glm::vec4(scenePtr->pointLights()[j]->position, 1.0)));
 			m_pbrShaderProgramPtr->set(lightStr + "color", scenePtr->pointLights()[j]->color);
 			m_pbrShaderProgramPtr->set(lightStr + "intensity", scenePtr->pointLights()[j]->intensity);
 			m_pbrShaderProgramPtr->set(lightStr + "constantAttenuation", scenePtr->pointLights()[j]->constantAttenuation);
