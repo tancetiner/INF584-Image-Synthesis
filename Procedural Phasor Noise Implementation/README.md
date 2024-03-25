@@ -36,3 +36,7 @@ cd <path-to-project-directory>
 
 ## Resulting Images
 ![ram.off](Images/ram.png "ram.off")
+![denis.off](Images/denis.png "denis.off")
+![apple.off](Images/apple.png "apple.off")
+![dragon.off](Images/dragon.png "dragon.off")
+
