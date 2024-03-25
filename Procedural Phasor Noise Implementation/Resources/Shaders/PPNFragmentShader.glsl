@@ -24,7 +24,6 @@ uniform mat4 transInvViewMat;
 uniform int numOfLightSources;
 uniform LightSource lightSources[MAX_NUM_OF_LIGHT_SOURCES]; 
 uniform Material material;
-uniform float time;
 uniform sampler2D phasorNoiseTexture;
 uniform vec2 viewportResolution;
 

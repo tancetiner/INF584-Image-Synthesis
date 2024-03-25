@@ -27,7 +27,7 @@ bool Console::isVerbose () {
 void Console::print (const std::string & message, bool prefix) {
     if (Console::isVerbose ()) {
         if (prefix)
-            *sm_output << "[MyRenderer] ";
+            *sm_output << "[Procedural_Phasor_Noise] ";
         *sm_output << message; 
         if (prefix)
             *sm_output << std::endl;
