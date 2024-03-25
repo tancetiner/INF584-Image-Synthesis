@@ -28,6 +28,17 @@ void RayTracer::render (const std::shared_ptr<Scene> scenePtr) {
 	m_imagePtr->clear (scenePtr->backgroundColor ());
 	
 	// <---- Ray tracing code ---->
+	std::shared_ptr<Camera> camera = scenePtr->camera();
+	for (size_t i = 0; i < width; i++) {
+		for (size_t j = 0; j < height; j++) {
+			float x = (2.f * (i + 0.5f) / width - 1.f) * camera->getAspectRatio() * tan(glm::radians(camera->getFoV()) / 2.f);
+			float y = (1.f - 2.f * (j + 0.5f) / height) * tan(glm::radians(camera->getFoV()) / 2.f);
+			Ray ray = camera->rayAt(x, y);
+			m_imagePtr->operator()(i, j) = scenePtr->backgroundColor();
+		}
+	}
+	// <---- Ray tracing code ---->
+
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> after = clock.now();
 	double elapsedTime = (double)std::chrono::duration_cast<std::chrono::milliseconds>(after - before).count();

@@ -16,6 +16,7 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+#include "RayTracer.h"
 #include "Transform.h"
 
 /// Basic camera model
@@ -41,6 +42,8 @@ public:
 	
 	/// Returns the projection matrix stemming from the camera intrinsic parameter. 
 	inline glm::mat4 computeProjectionMatrix () const {	return glm::perspective (glm::radians (m_fov), m_aspectRatio, m_near, m_far); }
+
+	Ray rayAt (float x, float y) const;
 
 private:
 	float m_fov = 45.f; // Vertical field of view, in degrees
