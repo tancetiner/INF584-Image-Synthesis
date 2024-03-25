@@ -1,4 +1,4 @@
-# Lightcuts Implementation
+# Procedural Phasor Noise Implementation
 
 Implementation for the paper "Procedural Phasor Noise" for the course project. 
 
