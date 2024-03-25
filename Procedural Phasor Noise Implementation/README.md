@@ -33,3 +33,6 @@ Note that a collection of example meshes are provided in the Resources/Models di
 cd <path-to-project-directory>
 ./Procedural_Phasor_Noise ./Resources/Models/denis.off
 ```
+
+## Resulting Images
+![ram.off](Images/ram.png "ram.off")
