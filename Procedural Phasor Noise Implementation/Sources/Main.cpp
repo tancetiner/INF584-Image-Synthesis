@@ -63,18 +63,18 @@ static bool isAnimated = false;
 void clear ();
 
 void printHelp () {
-	Console::print (std::string ("Help:\n") 
-			  + "\tMouse commands:\n" 
+	Console::print (std::string ("Help:\n")
+			  + "\t_____MOUSE COMMANDS_____\n" 
 			  + "\t* Left button: rotate camera\n" 
 			  + "\t* Middle button: zoom\n" 
 			  + "\t* Right button: pan camera\n" 
-			  + "\tKeyboard commands:\n" 
-   			  + "\t* ESC: quit the program\n"
+			  + "\n"
+			  + "\t_____KEYBOARD COMMANDS_____\n" 
+   			  + "\t* ESC or Q: quit the program\n"
    			  + "\t* H: print this help\n"
    			  + "\t* F12: reload GPU shaders\n"
    			  + "\t* D: save the rasterized image in "+ DEFAULT_RASTERIZED_IMAGE_OUTPUT_FILENAME + "\n"
-   			  + "\t* F/Shift+F: increase/decrease field of view\n"
-   			  + "\t* A: animate the scene\n");
+   			  + "\t* F/Shift+F: increase/decrease field of view\n");
 }
 
 /// Executed each time a key is entered.
@@ -98,6 +98,8 @@ void keyCallback (GLFWwindow * windowPtr, int key, int scancode, int action, int
 		} else if (action == GLFW_PRESS && key == GLFW_KEY_P) {
 			isAnimated = !isAnimated;
 			Console::print ("Animation " + isAnimated ? "started" : "stopped");
+		} else if (action == GLFW_PRESS && key == GLFW_KEY_Q) {
+			glfwSetWindowShouldClose (windowPtr, true); // Closes the application if the escape key is pressed
 		} else {
 			printHelp ();
 		}
@@ -222,7 +224,6 @@ void initScene () {
 	scenePtr->assignMaterial (0, 0);
 
 	// Adding a ground adapted to the loaded model
-
 	std::shared_ptr<Mesh> groundMeshPtr = std::make_shared<Mesh> ();
 	float extent = meshScale;
 	glm::vec3 startP = center + glm::vec3 (-extent, -height/2.f, -extent);

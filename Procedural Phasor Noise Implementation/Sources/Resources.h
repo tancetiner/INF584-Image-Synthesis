@@ -12,7 +12,7 @@
 
 static const std::string BASE_WINDOW_TITLE ("Procedural Phasor Noise Demo");
 static const std::string SHADER_PATH ("Resources/Shaders/");
-static const std::string DEFAULT_MESH_FILENAME ("Resources/Models/denis.off");
+static const std::string DEFAULT_MESH_FILENAME ("Resources/Models/ram.off");
 static const std::string DEFAULT_RAYTRACED_IMAGE_OUTPUT_FILENAME ("MyRenderer_Raytraced.png");
 static const std::string DEFAULT_RASTERIZED_IMAGE_OUTPUT_FILENAME ("MyRenderer_Rasterized.png");
 static const int DEFAULT_WINDOW_WIDTH (1200);

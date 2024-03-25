@@ -2,7 +2,14 @@
 
 Implementation for the paper "Procedural Phasor Noise" for the course project. 
 
-### Building
+## Dependencies
+Have that dependencies in a directory called 'External':
+- glfw
+- glm
+- stb_image
+- glad
+
+## Building
 This is a standard CMake project. Building it consists in running:
 
 ```
@@ -11,7 +18,7 @@ cmake -B build
 cmake --build build --config Release
 ```
 
-### Running
+## Running
 
 To run the program
 ```
