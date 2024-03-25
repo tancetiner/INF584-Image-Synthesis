@@ -2,6 +2,7 @@
 
 Implementation of the paper ["Procedural Phasor Noise"](https://hal.science/hal-02118508/file/ProceduralPhasorNoise.pdf) (by Thibault Tricard, Semyon Efremov, Cédric Zanni, Fabrice Neyret, Jonàs Martínez, Sylvain Lefebvre) for the INF584 - Image Synthesis course project. 
 
+More information can be found in the project report as a PDF file above.
 ## Dependencies
 Have these dependencies in a directory called 'External':
 - glfw
